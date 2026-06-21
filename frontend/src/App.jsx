@@ -7,6 +7,16 @@ function App() {
   const [name, setName] = useState("");
   const [dept, setDept] = useState("");
   const [salary, setSalary] = useState("");
+  const [val, setVal] = useState({ name: "", dept: "", salary: "" });
+
+  const handleUpdateClick = (emp) => {
+    setId(String(emp.empid));
+    setVal({
+      name: emp.name ?? "",
+      dept: String(emp.department_id ?? ""),
+      salary: String(emp.salary ?? ""),
+    });
+  };
 
   useEffect(() => {
     fetch('http://127.0.0.1:5000/').
@@ -38,6 +48,27 @@ function App() {
     setName("");
     setDept("");
     setSalary("");
+
+  };
+
+  const deleteItem = (id) => {
+    fetch(`http://127.0.0.1:5000/delete_employee/${id}`, {
+      method: "DELETE",
+    })
+      .then((res) => res.json())
+      .then((result) => setData(result.data))
+      .catch((err) => console.error("Error:", err));
+  };
+
+  const updateItem = (id) => {
+    fetch(`http://127.0.0.1:5000/update_employee/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(val),
+    })
+      .then((res) => res.json())
+      .then((result) => setData(result.data))      
+      .catch((err) => console.error("Error:", err));
   };
 
 
@@ -76,7 +107,33 @@ return (
     {
       data &&
         Array.isArray(data) &&
-        data.map((item, i) => <div key={i}>{item.name}, {item.department_id}</div>)
+        data.map((item, i) => <div key={i}>{item.name}, {item.department_id} , {item.empid}
+        <li>
+          <button onClick={() => handleUpdateClick(item)}>
+            Edit
+          </button>
+        </li>
+        <li>
+          <input
+            placeholder="name"
+            value={val.name}
+            onChange={(e) => setVal((prev) => ({ ...prev, name: e.target.value }))}
+          />
+        </li>
+        <li>
+          <button
+            onClick={() => updateItem(item.empid)}
+            disabled={!val.name && !val.salary}
+          >
+            Update
+          </button>
+        </li>
+        <li>
+          <button onClick={()=>deleteItem(item.empid)}>
+          Delete
+          </button>
+          </li>
+        </div>)
     }
   </div>
 );
