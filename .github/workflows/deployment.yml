@@ -1,27 +1,25 @@
-# This is a basic workflow to help you get started with Actions
+name: Flask React CI
 
-name: CI/CD pipeline
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+      - master
+
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
+      - master
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  backend-code:
-    name: backend
-    runs-on: ubunutu-latest
+
+  backend:
+    name: Backend Validation
+
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -33,3 +31,32 @@ jobs:
         run: |
           cd backend
           pip install -r requirements.txt
+
+      - name: Validate Flask Application
+        run: |
+          cd backend
+          python -m py_compile app.py
+
+  frontend:
+    name: Frontend Build
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build React Application
+        run: |
+          cd frontend
+          npm run build
